@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Ticker Todo</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    #ticker {
+      white-space: nowrap;
+      padding-left: 100%;
+      animation: scroll 20s linear infinite;
+      font-size: 24px;
+    }
+
+    @keyframes scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-100%); }
+    }
+  </style>
+</head>
+<body>
+  <div id="ticker">Your todo list will scroll here...</div>
+</body>
+</html>
