@@ -1,17 +1,42 @@
 {
   "name": "ticker-tape-todo",
   "version": "1.0.0",
-  "description": "Ticker Tape ",
+  "description": "Ticker Tape",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "keywords": [],
-  "author": "",
+  "author": "Matt Schardt",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "electron": "^39.2.3"
+    "electron": "^39.2.3",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.schardt.henryticker",
+    "productName": "Henry's Ticker",
+    "files": [
+      "**/*",
+      "!node_modules/.cache/**"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
+    }
   }
 }

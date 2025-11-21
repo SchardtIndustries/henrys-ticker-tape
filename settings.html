@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Henry's Ticker Settings</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 12px;
+      font-family: Arial, sans-serif;
+      background: #181818;
+      color: #f8f8f8;
+      overflow-y: auto;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .section {
+      margin-bottom: 16px;
+      padding: 10px;
+      border-radius: 6px;
+      background: #222;
+      border: 1px solid #333;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .field-row label { font-size: 13px; flex: 1; }
+    .field-row input[type="color"] { width: 48px; height: 24px; }
+    .field-row input[type="number"] { width: 70px; }
+    .field-row input[type="range"] { flex: 2; }
+    .field-row select { flex: 2; }
+    .field-row span.value-label { width: 60px; text-align: right; }
+
+    .footer-actions { text-align: right; margin-top: 10px; }
+    .footer-actions button {
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: #333;
+      border: 1px solid #555;
+      color: white;
+      cursor: pointer;
+    }
+    .footer-actions button:hover { background: #444; }
+    small { color: #aaa; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+  <h1>Henry's Ticker Settings</h1>
+
+  <!-- Scrolling Text -->
+  <div class="section">
+    <div class="section-title">Scrolling Text</div>
+    <div class="field-row">
+      <label for="customText">Text content</label>
+      <input id="customText" type="text" style="flex:3;">
+    </div>
+    <small>This text will scroll continuously in the ticker bar.</small>
+  </div>
+
+  <!-- Appearance -->
+  <div class="section">
+    <div class="section-title">Appearance</div>
+    <div class="field-row">
+      <label for="bgColor">Background color</label>
+      <input id="bgColor" type="color">
+    </div>
+    <div class="field-row">
+      <label for="textColor">Text color</label>
+      <input id="textColor" type="color">
+    </div>
+    <div class="field-row">
+      <label for="fontSize">Font size (px)</label>
+      <input id="fontSize" type="number" min="10" max="72">
+    </div>
+  </div>
+
+  <!-- Font -->
+  <div class="section">
+    <div class="section-title">Font</div>
+    <div class="field-row">
+      <label for="fontFamily">Ticker font</label>
+      <select id="fontFamily">
+        <option value="system">System (Segoe)</option>
+        <option value="serif">Serif (Georgia)</option>
+        <option value="mono">Monospace</option>
+        <option value="rounded">Rounded (Trebuchet)</option>
+      </select>
+    </div>
+    <small>Choose the typeface used for the scrolling text.</small>
+  </div>
+
+  <!-- Scroll Speed -->
+  <div class="section">
+    <div class="section-title">Scroll Speed</div>
+    <div class="field-row">
+      <label for="scrollSpeed">Duration (seconds)<br><small>Lower = faster</small></label>
+      <input id="scrollSpeed" type="range" min="5" max="60" step="1">
+      <span id="scrollSpeedValue" class="value-label"></span>
+    </div>
+  </div>
+
+  <!-- Text Opacity -->
+  <div class="section">
+    <div class="section-title">Text Opacity</div>
+    <div class="field-row">
+      <label for="opacity">Text opacity</label>
+      <input id="opacity" type="range" min="0.1" max="1" step="0.05">
+      <span id="opacityValue" class="value-label"></span>
+    </div>
+  </div>
+
+  <!-- Background Opacity -->
+  <div class="section">
+    <div class="section-title">Background Opacity</div>
+    <div class="field-row">
+      <label for="bgOpacity">Background opacity</label>
+      <input id="bgOpacity" type="range" min="0.1" max="1" step="0.05">
+      <span id="bgOpacityValue" class="value-label"></span>
+    </div>
+  </div>
+
+  <!-- Window Position -->
+  <div class="section">
+    <div class="section-title">Window Position</div>
+    <div class="field-row">
+      <label for="position">Screen edge</label>
+      <select id="position">
+        <option value="top">Top</option>
+        <option value="bottom">Bottom</option>
+        <option value="left">Left</option>
+        <option value="right">Right</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Scroll Direction -->
+  <div class="section">
+    <div class="section-title">Scroll Direction</div>
+    <div class="field-row">
+      <label for="scrollDirection">Direction</label>
+      <select id="scrollDirection">
+        <option value="left">Left</option>
+        <option value="right">Right</option>
+        <option value="up">Up</option>
+        <option value="down">Down</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Text Alignment -->
+  <div class="section">
+    <div class="section-title">Text Alignment</div>
+    <div class="field-row">
+      <label for="textAlign">Vertical alignment</label>
+      <select id="textAlign">
+        <option value="top">Top</option>
+        <option value="center">Center</option>
+        <option value="bottom">Bottom</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ★ NEW: Bar Size -->
+  <div class="section">
+    <div class="section-title">Bar Size</div>
+    <div class="field-row">
+      <label for="barSize">
+        Thickness (pixels)
+        <br><small>Height for top/bottom, width for left/right</small>
+      </label>
+      <input id="barSize" type="range" min="20" max="200" step="5">
+      <span id="barSizeValue" class="value-label"></span>
+    </div>
+  </div>
+
+  <!-- Taskbar Reserve -->
+  <div class="section">
+    <div class="section-title">Taskbar Reserve (bottom)</div>
+    <div class="field-row">
+      <label for="taskbarReserve">Margin above taskbar</label>
+      <input id="taskbarReserve" type="range" min="0" max="56" step="1">
+      <span id="taskbarReserveValue" class="value-label"></span>
+    </div>
+  </div>
+
+  <div class="footer-actions">
+    <button id="resetDefaults">Reset to defaults</button>
+  </div>
+
+<script>
+  const STORAGE_KEY = "henryTickerSettings";
+
+  const customTextInput = document.getElementById("customText");
+  const bgColorInput = document.getElementById("bgColor");
+  const textColorInput = document.getElementById("textColor");
+  const fontSizeInput = document.getElementById("fontSize");
+  const fontFamilySelect = document.getElementById("fontFamily");
+  const scrollSpeedInput = document.getElementById("scrollSpeed");
+  const scrollSpeedValue = document.getElementById("scrollSpeedValue");
+  const opacityInput = document.getElementById("opacity");
+  const opacityValue = document.getElementById("opacityValue");
+  const bgOpacityInput = document.getElementById("bgOpacity");
+  const bgOpacityValue = document.getElementById("bgOpacityValue");
+  const positionSelect = document.getElementById("position");
+  const scrollDirectionSelect = document.getElementById("scrollDirection");
+  const textAlignSelect = document.getElementById("textAlign");
+  const barSizeInput = document.getElementById("barSize");
+  const barSizeValue = document.getElementById("barSizeValue");
+  const taskbarReserveInput = document.getElementById("taskbarReserve");
+  const taskbarReserveValue = document.getElementById("taskbarReserveValue");
+  const resetBtn = document.getElementById("resetDefaults");
+
+  const DEFAULT_SETTINGS = {
+    customText: "Your todo list will scroll here...",
+    bg: "#111111",
+    text: "#ffffff",
+    fontSize: "24px",
+    speed: "20s",
+    opacity: 1,
+    bgOpacity: 1,
+    position: "top",
+    scrollDirection: "left",
+    taskbarReserve: 40,
+    textAlign: "center",
+    fontFamily: "system",
+    barSize: 80,               // ★ NEW default bar thickness
+  };
+
+  function applyToInputs(settings) {
+    customTextInput.value = settings.customText || DEFAULT_SETTINGS.customText;
+    bgColorInput.value = settings.bg || DEFAULT_SETTINGS.bg;
+    textColorInput.value = settings.text || DEFAULT_SETTINGS.text;
+
+    fontSizeInput.value = settings.fontSize
+      ? parseInt(settings.fontSize)
+      : parseInt(DEFAULT_SETTINGS.fontSize);
+
+    const speedSeconds = settings.speed
+      ? parseInt(settings.speed)
+      : parseInt(DEFAULT_SETTINGS.speed);
+    scrollSpeedInput.value = speedSeconds;
+    scrollSpeedValue.textContent = speedSeconds + "s";
+
+    const opacity = settings.opacity ?? DEFAULT_SETTINGS.opacity;
+    opacityInput.value = opacity;
+    opacityValue.textContent = opacity.toFixed(2);
+
+    const bgOpacity = settings.bgOpacity ?? DEFAULT_SETTINGS.bgOpacity;
+    bgOpacityInput.value = bgOpacity;
+    bgOpacityValue.textContent = bgOpacity.toFixed(2);
+
+    positionSelect.value = settings.position || DEFAULT_SETTINGS.position;
+    scrollDirectionSelect.value = settings.scrollDirection || DEFAULT_SETTINGS.scrollDirection;
+    textAlignSelect.value = settings.textAlign || DEFAULT_SETTINGS.textAlign;
+    fontFamilySelect.value = settings.fontFamily || DEFAULT_SETTINGS.fontFamily;
+
+    const barSize = settings.barSize ?? DEFAULT_SETTINGS.barSize;
+    barSizeInput.value = barSize;
+    barSizeValue.textContent = barSize + " px";
+
+    const reserve = settings.taskbarReserve ?? DEFAULT_SETTINGS.taskbarReserve;
+    taskbarReserveInput.value = reserve;
+    taskbarReserveValue.textContent = reserve + " px";
+  }
+
+  function buildSettingsFromInputs() {
+    const speedSeconds = scrollSpeedInput.value || "20";
+    scrollSpeedValue.textContent = speedSeconds + "s";
+
+    const opacity = parseFloat(opacityInput.value || DEFAULT_SETTINGS.opacity);
+    opacityValue.textContent = opacity.toFixed(2);
+
+    const bgOpacity = parseFloat(bgOpacityInput.value || DEFAULT_SETTINGS.bgOpacity);
+    bgOpacityValue.textContent = bgOpacity.toFixed(2);
+
+    const barSize = parseInt(barSizeInput.value || DEFAULT_SETTINGS.barSize, 10);
+    barSizeValue.textContent = barSize + " px";
+
+    const reserve = parseInt(taskbarReserveInput.value || DEFAULT_SETTINGS.taskbarReserve, 10);
+    taskbarReserveValue.textContent = reserve + " px";
+
+    return {
+      customText: customTextInput.value || DEFAULT_SETTINGS.customText,
+      bg: bgColorInput.value || DEFAULT_SETTINGS.bg,
+      text: textColorInput.value || DEFAULT_SETTINGS.text,
+      fontSize: fontSizeInput.value ? `${fontSizeInput.value}px` : DEFAULT_SETTINGS.fontSize,
+      speed: `${speedSeconds}s`,
+      opacity,
+      bgOpacity,
+      position: positionSelect.value || DEFAULT_SETTINGS.position,
+      scrollDirection: scrollDirectionSelect.value || DEFAULT_SETTINGS.scrollDirection,
+      taskbarReserve: reserve,
+      textAlign: textAlignSelect.value || DEFAULT_SETTINGS.textAlign,
+      fontFamily: fontFamilySelect.value || DEFAULT_SETTINGS.fontFamily,
+      barSize,      // ★ NEW
+    };
+  }
+
+  function saveSettings() {
+    const settings = buildSettingsFromInputs();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+
+    if (window.electronAPI?.saveSettings) {
+      window.electronAPI.saveSettings(settings);
+    }
+  }
+
+  // Event listeners
+  customTextInput.addEventListener("input", saveSettings);
+  bgColorInput.addEventListener("input", saveSettings);
+  textColorInput.addEventListener("input", saveSettings);
+  fontSizeInput.addEventListener("input", saveSettings);
+  fontFamilySelect.addEventListener("change", saveSettings);
+  scrollSpeedInput.addEventListener("input", saveSettings);
+  opacityInput.addEventListener("input", saveSettings);
+  bgOpacityInput.addEventListener("input", saveSettings);
+  positionSelect.addEventListener("change", saveSettings);
+  scrollDirectionSelect.addEventListener("change", saveSettings);
+  textAlignSelect.addEventListener("change", saveSettings);
+  barSizeInput.addEventListener("input", saveSettings);   // ★ NEW
+  taskbarReserveInput.addEventListener("input", saveSettings);
+
+  resetBtn.addEventListener("click", () => {
+    applyToInputs(DEFAULT_SETTINGS);
+    saveSettings();
+  });
+
+  // Load initial
+  loadSettings();
+</script>
+
+</body>
+</html>

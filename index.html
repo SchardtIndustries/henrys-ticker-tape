@@ -2,32 +2,364 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Ticker Todo</title>
+  <title>Henry's Ticker Todo</title>
   <style>
+    :root {
+      --ticker-bg: #111111;            /* default background */
+      --ticker-text: #ffffff;          /* default text color */
+      --ticker-font-size: 24px;        /* default font size */
+      --ticker-speed: 20s;             /* default scroll duration */
+      --ticker-opacity: 1;             /* text opacity */
+      --ticker-bg-opacity: 1;          /* background opacity */
+      --ticker-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
     body {
       margin: 0;
-      background: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
+      background: transparent;         /* real color set via JS rgba(...) */
+      color: var(--ticker-text);
+      font-family: Arial, sans-serif;  /* UI font; ticker uses its own variable */
       overflow: hidden;
     }
 
-    #ticker {
-      white-space: nowrap;
-      padding-left: 100%;
-      animation: scroll 20s linear infinite;
-      font-size: 24px;
+    .app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;          /* vertical stack so justify-content is vertical */
+      padding: 0 12px;
+      justify-content: center;         /* default center; overridden by classes below */
     }
 
-    @keyframes scroll {
-      from { transform: translateX(0); }
-      to { transform: translateX(-100%); }
+    .app.align-top {
+      justify-content: flex-start;
+    }
+
+    .app.align-center {
+      justify-content: center;
+    }
+
+    .app.align-bottom {
+      justify-content: flex-end;
+    }
+
+    /* Gear button */
+    .settings-button {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      opacity: 0.8;
+      user-select: none;
+      z-index: 2;
+    }
+
+    .settings-button:hover {
+      opacity: 1;
+    }
+
+    /* Ticker base */
+    #ticker {
+      animation-duration: var(--ticker-speed);
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      font-size: var(--ticker-font-size);
+      opacity: var(--ticker-opacity); /* text opacity */
+      font-family: var(--ticker-font-family);
+    }
+
+    /* Horizontal mode */
+    #ticker.horizontal {
+      white-space: nowrap;
+      padding-left: 100%;
+      display: block;
+    }
+
+    /* Vertical mode */
+    #ticker.vertical {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      white-space: normal;
+      padding-left: 0;
+    }
+
+    .ticker-char,
+    .ticker-space {
+      display: block;
+      line-height: 1.1;
+    }
+
+    .ticker-space {
+      height: 0.6em; /* gap between words in vertical mode */
+    }
+
+    /* Animations */
+
+    /* Horizontal */
+    @keyframes scroll-left {
+      from { transform: translateX(0%); }
+      to { transform: translateX(-200%); }
+    }
+
+    @keyframes scroll-right {
+      from { transform: translateX(-200%); }
+      to { transform: translateX(0%); }
+    }
+
+    /* Vertical */
+    @keyframes scroll-up {
+      from { transform: translateY(200%); }
+      to { transform: translateY(-100%); }
+    }
+
+    @keyframes scroll-down {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(200%); }
     }
   </style>
 </head>
 <body>
-  <div id="ticker">Your todo list will scroll here...</div>
+  <div class="app align-center">
+    <!-- Gear icon -->
+    <div id="settingsButton" class="settings-button" title="Settings">
+      ⚙
+    </div>
+
+    <!-- Ticker text -->
+    <div id="ticker" class="horizontal">Your todo list will scroll here...</div>
+  </div>
+
+  <script>
+    const settingsButton = document.getElementById("settingsButton");
+    const ticker = document.getElementById("ticker");
+    const appEl = document.querySelector(".app");
+    const STORAGE_KEY = "henryTickerSettings";
+
+    let BASE_TEXT = ticker.textContent;
+    let currentDirection = "left";
+
+    function updateBaseText(newText) {
+      BASE_TEXT = newText || "Your todo list will scroll here...";
+      setScrollDirection(currentDirection);
+    }
+
+    function hexToRgb(hex) {
+      if (!hex) return null;
+      let c = hex.trim().replace("#", "");
+      if (c.length === 3) {
+        c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
+      }
+      if (c.length !== 6) return null;
+      const num = parseInt(c, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255,
+      };
+    }
+
+    function updateBackgroundColor() {
+      const styles = getComputedStyle(document.documentElement);
+      const bgHex = styles.getPropertyValue("--ticker-bg").trim() || "#111111";
+      const bgOpacityRaw = styles.getPropertyValue("--ticker-bg-opacity").trim() || "1";
+      const bgOpacity = parseFloat(bgOpacityRaw) || 1;
+
+      const rgb = hexToRgb(bgHex);
+      if (rgb) {
+        document.body.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${bgOpacity})`;
+      } else {
+        document.body.style.backgroundColor = bgHex; // fallback
+      }
+    }
+
+    function applyTextAlignment(align) {
+      appEl.classList.remove("align-top", "align-center", "align-bottom");
+      switch (align) {
+        case "top":
+          appEl.classList.add("align-top");
+          break;
+        case "bottom":
+          appEl.classList.add("align-bottom");
+          break;
+        case "center":
+        default:
+          appEl.classList.add("align-center");
+          break;
+      }
+    }
+
+    function setFontFamily(key) {
+      let cssValue;
+      switch (key) {
+        case "serif":
+          cssValue = 'Georgia, "Times New Roman", serif';
+          break;
+        case "mono":
+          cssValue = '"SF Mono", Consolas, "Courier New", monospace';
+          break;
+        case "rounded":
+          cssValue = '"Trebuchet MS", Verdana, Arial, sans-serif';
+          break;
+        case "system":
+        default:
+          cssValue = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
+          break;
+      }
+      document.documentElement.style.setProperty("--ticker-font-family", cssValue);
+    }
+
+    function setupTickerContentForDirection(dir) {
+      const vertical = dir === "up" || dir === "down";
+
+      if (vertical) {
+        ticker.classList.remove("horizontal");
+        ticker.classList.add("vertical");
+
+        ticker.innerHTML = "";
+
+        let chars = [...BASE_TEXT];
+
+        if (dir === "down") {
+          chars = chars.reverse();
+        }
+
+        for (const ch of chars) {
+          const div = document.createElement("div");
+
+          if (ch === " ") {
+            div.className = "ticker-space";
+            div.textContent = "";
+          } else {
+            div.className = "ticker-char";
+            div.textContent = ch;
+          }
+
+          ticker.appendChild(div);
+        }
+
+      } else {
+        ticker.classList.remove("vertical");
+        ticker.classList.add("horizontal");
+        ticker.innerHTML = "";
+        ticker.textContent = BASE_TEXT;
+      }
+    }
+
+    function setScrollDirection(dir) {
+      currentDirection = dir || "left";
+      setupTickerContentForDirection(currentDirection);
+
+      const map = {
+        left: "scroll-left",
+        right: "scroll-right",
+        up: "scroll-up",
+        down: "scroll-down",
+      };
+      const animationName = map[currentDirection] || "scroll-left";
+      ticker.style.animationName = animationName;
+    }
+
+    function applySettings(settings) {
+      if (!settings) return;
+
+      if (settings.customText !== undefined) {
+        updateBaseText(settings.customText);
+      }
+
+      if (settings.bg) {
+        document.documentElement.style.setProperty("--ticker-bg", settings.bg);
+      }
+      if (settings.text) {
+        document.documentElement.style.setProperty("--ticker-text", settings.text);
+      }
+      if (settings.fontSize) {
+        document.documentElement.style.setProperty("--ticker-font-size", settings.fontSize);
+      }
+      if (settings.speed) {
+        document.documentElement.style.setProperty("--ticker-speed", settings.speed);
+      }
+      if (settings.opacity !== undefined) {
+        document.documentElement.style.setProperty("--ticker-opacity", settings.opacity);
+      }
+      if (settings.bgOpacity !== undefined) {
+        document.documentElement.style.setProperty("--ticker-bg-opacity", settings.bgOpacity);
+      }
+      if (settings.scrollDirection) {
+        setScrollDirection(settings.scrollDirection);
+      } else {
+        setScrollDirection("left");
+      }
+      if (settings.textAlign) {
+        applyTextAlignment(settings.textAlign);
+      } else {
+        applyTextAlignment("center");
+      }
+      if (settings.fontFamily) {
+        setFontFamily(settings.fontFamily);
+      } else {
+        setFontFamily("system");
+      }
+
+      updateBackgroundColor();
+    }
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+        updateBaseText(BASE_TEXT);
+        setScrollDirection("left");
+        applyTextAlignment("center");
+        setFontFamily("system");
+        updateBackgroundColor();
+        return;
+        }
+        const settings = JSON.parse(raw);
+        applySettings(settings);
+
+        if (window.electronAPI?.saveSettings) {
+          window.electronAPI.saveSettings(settings);
+        }
+      } catch (e) {
+        console.error("Failed to load settings", e);
+        updateBaseText(BASE_TEXT);
+        setScrollDirection("left");
+        applyTextAlignment("center");
+        setFontFamily("system");
+        updateBackgroundColor();
+      }
+    }
+
+    settingsButton.addEventListener("click", () => {
+      if (window.electronAPI?.openSettings) {
+        window.electronAPI.openSettings();
+      }
+    });
+
+    if (window.electronAPI?.onSettingsUpdated) {
+      window.electronAPI.onSettingsUpdated((settings) => {
+        applySettings(settings);
+      });
+    }
+
+    loadSettings();
+  </script>
 </body>
 </html>
